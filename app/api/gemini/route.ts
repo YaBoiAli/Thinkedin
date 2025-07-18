@@ -51,8 +51,7 @@ Based on the user's request, which of these posts are most relevant? Reply with 
     const match = text.match(/\b(\d+(?:,\s*\d+)*)\b/);
     let selectedPosts: typeof posts = [];
     if (match) {
-      const nums = match[1].split(/,\s*/).map(n => parseInt(n, 10) - 1).filter(i => i >= 0 && i < posts.length);
-      selectedPosts = nums.map(i => posts[i]);
+      const nums = match[1].split(/,\s*/).map((n: string) => parseInt(n, 10) - 1);
     }
     return NextResponse.json({ text, selectedPosts, raw: data });
   } catch (e: any) {
