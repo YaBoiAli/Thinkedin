@@ -53,7 +53,7 @@ export default function ChatbotPage() {
     <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-neutral-50 dark:bg-neutral-950">
       <div className="w-full max-w-md mx-auto">
         <div className="mb-6 flex justify-center">
-          <Logo size="lg" />
+          <Logo size={24} />
         </div>
         <div className="mb-8 p-8 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow flex flex-col items-center gap-4">
           <span className="text-5xl mb-2">🤖</span>

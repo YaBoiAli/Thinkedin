@@ -102,7 +102,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
         <div className="mb-6 flex justify-center">
-          <Logo size="lg" />
+          <Logo size={24} />
         </div>
         <h1 className="text-2xl font-bold mb-6">Sign in to Thinkedin</h1>
         {showUsernamePrompt ? (

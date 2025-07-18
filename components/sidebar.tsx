@@ -10,7 +10,7 @@ export default function Sidebar() {
   return (
     <aside className="h-screen w-64 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex flex-col py-8 px-4 shadow-xl border-r border-neutral-200 dark:border-neutral-800 fixed left-0 top-0 z-20">
       <div className="mb-10 flex items-center gap-3">
-        <Logo size="lg" />
+        <Logo size={24} />
       </div>
       <nav className="flex flex-col gap-2 flex-1">
         <SidebarLink href="/" icon={<FaHome />} active={pathname === "/"}>

@@ -154,7 +154,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-neutral-900">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-6 flex justify-center">
-          <Logo size="lg" />
+          <Logo size={24} />
         </div>
         <h1 className="text-3xl font-extrabold mb-6 text-center text-neutral-900 dark:text-neutral-100">
           {username ? `${username}'s Dashboard` : "Your Dashboard"}
