@@ -19,6 +19,6 @@ export function Logo({ size = 40, className }: LogoProps) {
 }
 
 // Icon-only variant for favicon/tab
-export function LogoIcon({ size = 'md', className }: Omit<LogoProps, 'variant'>) {
-  return <Logo size={size} variant="icon-only" className={className} />;
-} 
+export function LogoIcon({ size = 40, className }: Omit<LogoProps, 'variant'>) {
+  return <Logo size={size} className={className} />;
+}
