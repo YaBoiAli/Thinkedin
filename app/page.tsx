@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { ThoughtForm } from '@/components/thought-form'
 import { ThoughtsList } from '@/components/thoughts-list'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/logo'
 import { Thought as ThoughtType } from '@/types'
 import { getThoughts } from '@/lib/firebase-service'
