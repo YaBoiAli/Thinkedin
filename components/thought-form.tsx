@@ -5,7 +5,8 @@ import { Send } from 'lucide-react'
 import { createThought } from '@/lib/firebase-service'
 import { Thought } from '@/types'
 import { cn } from '@/lib/utils'
-import { generateShadowIdentity } from '@/lib/pseudonyms';
+import { generateShadowIdentity } from '@/lib/pseudonyms'
+import { useToast } from '@/components/toast-provider'
 
 const TAG_OPTIONS = [
   '#philosophy', '#deepthoughts', '#randomthoughts', '#existential', '#showerthoughts', '#mentalhealth', '#overthinking', '#humancondition', '#introspection', '#ideas', '#curious', '#lifequestions', '#minddump', '#emotion', '#truth', '#technology', '#relationships', '#school', '#future', '#love', '#career', '#faith', '#politics', '#science', '#culture', '#identity', '#purpose', '#memory', '#dreams', '#addiction', '#networking', '#jobsearch', '#productivity', '#leadership', '#worklife', '#coding', '#ai', '#startups', '#linkedin', '#resume', '#interview', '#rant', '#confession', '#advice', '#storytime', '#question', '#pain', '#joy', '#inspiration', '#confused', '#lonely', '#hope', '#darkthoughts', '#lighthearted', '#anonymous'
@@ -31,6 +32,7 @@ export function ThoughtForm({ onThoughtCreated }: ThoughtFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [postType, setPostType] = useState(POST_TYPES[0].key);
   const [shadowIdentity, setShadowIdentity] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   // On mount, assign shadow identity if not present
   useEffect(() => {
@@ -74,8 +76,13 @@ export function ThoughtForm({ onThoughtCreated }: ThoughtFormProps) {
       setContent('');
       setTags([]);
       setPostType(POST_TYPES[0].key);
+      
+      // Show success notification
+      const typeLabel = POST_TYPES.find(t => t.key === postType)?.label || 'Thought';
+      showToast(`${typeLabel} posted successfully! 🎉`, 'success');
     } catch (err: any) {
       setError(err.message || 'Failed to post thought.');
+      showToast('Failed to post. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -141,7 +148,7 @@ export function ThoughtForm({ onThoughtCreated }: ThoughtFormProps) {
           </div>
           <div className="flex items-center gap-2 mb-1">
             <select
-              className="border border-neutral-200 dark:border-neutral-700 rounded px-2 py-1 text-xs bg-white dark:bg-neutral-900"
+              className="border border-neutral-700 rounded px-2 py-1 text-xs bg-neutral-900"
               value=""
               onChange={e => {
                 if (e.target.value) handleAddTag(e.target.value);
@@ -154,7 +161,7 @@ export function ThoughtForm({ onThoughtCreated }: ThoughtFormProps) {
             </select>
             <input
               type="text"
-              className="border border-neutral-200 dark:border-neutral-700 rounded px-2 py-1 text-xs bg-white dark:bg-neutral-900"
+              className="border border-neutral-700 rounded px-2 py-1 text-xs bg-neutral-900"
               placeholder="Add custom tag"
               value={customTag}
               onChange={e => setCustomTag(e.target.value)}

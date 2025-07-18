@@ -100,7 +100,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+              <div className="bg-neutral-50 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
         <div className="mb-6 flex justify-center">
           <Logo size={24} />
         </div>

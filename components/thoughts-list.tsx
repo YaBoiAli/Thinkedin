@@ -4,7 +4,6 @@ import { Thought } from '@/types'
 import { ThoughtCard } from './thought-card'
 import { cn } from '@/lib/utils'
 import Masonry from 'react-masonry-css';
-import 'react-masonry-css/dist/styles.css';
 
 interface ThoughtsListProps {
   thoughts: Thought[]
@@ -57,6 +56,8 @@ export function ThoughtsList({ thoughts, onThoughtsUpdate }: ThoughtsListProps) 
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
         }
       `}</style>
     </div>

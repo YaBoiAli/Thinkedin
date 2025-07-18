@@ -28,15 +28,15 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
   const [reactions, setReactions] = useState(thought.reactions || { inspired: 0, think: 0, relatable: 0, following: 0 });
   const [userReactions, setUserReactions] = useState<{ [key: string]: boolean }>({});
 
-  // Randomize content length per card
+  // Randomize content length per card - Pinterest style
   const [showFull, setShowFull] = useState(false);
   const contentPercent = useMemo(() => {
-    const options = [0.2, 0.4, 0.7, 1];
+    const options = [0.2, 0.4, 0.6, 0.8]; // 20%, 40%, 60%, 80%
     return options[Math.floor(Math.random() * options.length)];
   }, [thought.id]);
   const maxLen = Math.ceil((thought.content?.length || 0) * contentPercent);
-  const isTruncated = !showFull && contentPercent < 1 && thought.content.length > maxLen;
-  const displayContent = showFull || contentPercent === 1 ? thought.content : thought.content.slice(0, maxLen);
+  const isTruncated = !showFull && thought.content.length > maxLen;
+  const displayContent = showFull ? thought.content : thought.content.slice(0, maxLen);
 
   useEffect(() => {
     // Load user reactions from localStorage
@@ -73,7 +73,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
 
   return (
     <div
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm hover:shadow-lg transition-shadow cursor-pointer group p-4 mb-2 max-w-full"
+      className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-sm hover:shadow-lg transition-shadow cursor-pointer group p-4 mb-2 max-w-full overflow-hidden"
       style={{ minHeight: 120 }}
       onClick={e => {
         if ((e.target as HTMLElement).closest('button, a')) return;
@@ -91,7 +91,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
       </div>
       {/* Post content (truncate to 3 lines) */}
       <div className="mb-3">
-        <p className="text-foreground text-base leading-relaxed font-medium whitespace-pre-wrap">
+        <p className="text-foreground text-base leading-relaxed font-medium whitespace-pre-wrap break-words overflow-hidden">
           {displayContent}{isTruncated && '...'}
         </p>
         {isTruncated && (
@@ -164,6 +164,8 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
           <div className="mt-3 animate-slide-up">
             <CommentSection
               thoughtId={thought.id}
+              showBackButton={true}
+              onBack={() => setShowComments(false)}
             />
           </div>
         )}

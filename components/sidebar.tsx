@@ -8,9 +8,9 @@ import { Logo } from './logo';
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="h-screen w-64 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 flex flex-col py-8 px-4 shadow-xl border-r border-neutral-200 dark:border-neutral-800 fixed left-0 top-0 z-20">
+    <aside className="h-screen w-64 bg-neutral-900 text-neutral-100 flex flex-col py-8 px-4 shadow-xl border-r border-neutral-800 fixed left-0 top-0 z-20">
       <div className="mb-10 flex items-center gap-3">
-        <Logo size={24} />
+        <Logo size={48} />
       </div>
       <nav className="flex flex-col gap-2 flex-1">
         <SidebarLink href="/" icon={<FaHome />} active={pathname === "/"}>
@@ -26,7 +26,7 @@ export default function Sidebar() {
           Chatbot
         </SidebarLink>
       </nav>
-      <div className="mt-10 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700">
+      <div className="mt-10 p-4 bg-neutral-800 rounded-lg text-sm text-neutral-200 border border-neutral-700">
         <div className="flex items-center gap-2 mb-2">
           <FaRobot className="text-lg" />
           <span>AI Chatbot</span>
@@ -39,7 +39,7 @@ export default function Sidebar() {
 
 function SidebarLink({ href, icon, children, active }: { href: string; icon: React.ReactNode; children: React.ReactNode; active: boolean }) {
   return (
-    <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${active ? "bg-neutral-200 dark:bg-neutral-800" : "hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}>
+    <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${active ? "bg-neutral-800" : "hover:bg-neutral-800"}`}>
       <span className="text-lg">{icon}</span>
       <span>{children}</span>
     </Link>

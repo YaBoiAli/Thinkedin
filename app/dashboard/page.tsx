@@ -8,6 +8,8 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, deleteDoc, doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { getUserComments, deleteThought } from '@/lib/firebase-service';
 import { Logo } from '@/components/logo';
+import Masonry from 'react-masonry-css';
+import { useMemo } from 'react';
 
 interface Thought {
   id: string;
@@ -36,6 +38,112 @@ function toDateSafe(ts: any): Date | null {
   if (ts instanceof Timestamp) return ts.toDate();
   if (ts.toDate) return ts.toDate();
   return null;
+}
+
+// Dashboard Thought Card Component with Pinterest-style random content length
+function DashboardThoughtCard({ 
+  thought, 
+  editingId, 
+  editContent, 
+  setEditContent, 
+  handleEdit, 
+  handleEditSave, 
+  handleEditCancel, 
+  handleDelete 
+}: { 
+  thought: ThoughtWithTags;
+  editingId: string | null;
+  editContent: string;
+  setEditContent: (content: string) => void;
+  handleEdit: (id: string, content: string) => void;
+  handleEditSave: (id: string) => void;
+  handleEditCancel: () => void;
+  handleDelete: (id: string) => void;
+}) {
+  const [showFull, setShowFull] = useState(false);
+  
+  // Pinterest-style random content length
+  const contentPercent = useMemo(() => {
+    const options = [0.2, 0.4, 0.6, 0.8]; // 20%, 40%, 60%, 80%
+    return options[Math.floor(Math.random() * options.length)];
+  }, [thought.id]);
+  
+  const maxLen = Math.ceil((thought.content?.length || 0) * contentPercent);
+  const isTruncated = !showFull && thought.content.length > maxLen;
+  const displayContent = showFull ? thought.content : thought.content.slice(0, maxLen);
+
+  return (
+    <div className="bg-neutral-800 rounded-xl shadow-lg p-6 flex flex-col gap-3 border border-neutral-700 hover:border-neutral-600 hover:shadow-xl transition-all duration-300 overflow-hidden group">
+      {editingId === thought.id ? (
+        <>
+                     <textarea
+             className="w-full border border-neutral-700 rounded-lg px-4 py-3 mb-3 text-base text-foreground bg-neutral-900 focus:border-neutral-500 focus:outline-none transition-colors resize-none"
+             value={editContent}
+             onChange={e => setEditContent(e.target.value)}
+             rows={3}
+           />
+                       <div className="flex gap-2 pt-2">
+               <button
+                 onClick={() => handleEditSave(thought.id)}
+                 className="py-2 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-sm hover:shadow-md"
+               >
+                 Save
+               </button>
+               <button
+                 onClick={handleEditCancel}
+                 className="py-2 px-4 rounded-lg bg-neutral-700 text-neutral-300 text-xs font-medium hover:bg-neutral-600 transition-all duration-200"
+               >
+                 Cancel
+               </button>
+             </div>
+        </>
+      ) : (
+        <>
+          <div className="text-base text-foreground leading-relaxed whitespace-pre-wrap break-words overflow-hidden mb-2">
+            {displayContent}
+            {isTruncated && '...'}
+          </div>
+          {isTruncated && (
+            <button
+              className="text-xs text-blue-600 hover:underline mb-2 text-left"
+              onClick={() => setShowFull(true)}
+            >
+              Show more
+            </button>
+          )}
+          {thought.tags && thought.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {thought.tags.map((tag: string) => (
+                <span key={tag} className="inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+            <span>{(() => {
+              const date = toDateSafe(thought.timestamp);
+              return date ? date.toLocaleString() : 'No date';
+            })()}</span>
+                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+               <button
+                 onClick={() => handleEdit(thought.id, thought.content)}
+                 className="py-1.5 px-3 rounded-lg bg-neutral-700 text-neutral-300 text-xs font-medium hover:bg-neutral-600 hover:text-white transition-all duration-200"
+               >
+                 Edit
+               </button>
+               <button
+                 onClick={() => handleDelete(thought.id)}
+                 className="py-1.5 px-3 rounded-lg bg-red-900/50 text-red-300 text-xs font-medium hover:bg-red-800 hover:text-red-100 transition-all duration-200"
+               >
+                 Delete
+               </button>
+             </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -151,101 +259,91 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="min-h-screen bg-neutral-900">
+      <div className="container mx-auto px-6 py-12 max-w-4xl">
         <div className="mb-6 flex justify-center">
-          <Logo size={24} />
+          <Logo size={48} />
         </div>
-        <h1 className="text-3xl font-extrabold mb-6 text-center text-neutral-900 dark:text-neutral-100">
+        <h1 className="text-3xl font-light mb-8 text-center text-neutral-100 tracking-wide">
           {username ? `${username}'s Dashboard` : "Your Dashboard"}
         </h1>
         {error && <div className="text-red-500 text-center mb-4">{error}</div>}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex justify-center items-center py-24">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-neutral-700"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-purple-500 border-t-transparent absolute top-0 left-0"></div>
+            </div>
           </div>
         ) : (
           <>
             {/* Thoughts Section */}
-            <section className="mb-16">
-              <h2 className="text-2xl font-bold mb-4 text-blue-700 dark:text-blue-300 border-b border-blue-200 dark:border-blue-800 pb-2">Your Thoughts</h2>
+            <section className="mb-20">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+                <h2 className="text-xl font-medium text-neutral-200">Your Thoughts</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-neutral-700 to-transparent"></div>
+              </div>
               {thoughts.length === 0 ? (
-                <div className="text-center text-neutral-500 dark:text-neutral-400">You haven't posted any thoughts yet.</div>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2">
-                  {thoughts.map(thought => (
-                    <div key={thought.id} className="bg-white dark:bg-neutral-800 rounded-xl shadow p-6 flex flex-col gap-2 border border-neutral-200 dark:border-neutral-700 hover:scale-[1.02] transition-transform">
-                      {editingId === thought.id ? (
-                        <>
-                          <textarea
-                            className="w-full border rounded px-3 py-2 mb-2 text-base text-foreground bg-neutral-50 dark:bg-neutral-900"
-                            value={editContent}
-                            onChange={e => setEditContent(e.target.value)}
-                            rows={3}
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEditSave(thought.id)}
-                              className="py-1 px-4 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleEditCancel}
-                              className="py-1 px-4 rounded bg-neutral-300 dark:bg-neutral-700 text-xs font-semibold hover:bg-neutral-400 dark:hover:bg-neutral-600 transition"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-base text-foreground leading-relaxed whitespace-pre-wrap mb-2">{thought.content}</div>
-                          {thought.tags && thought.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {thought.tags.map((tag: string) => (
-                                <span key={tag} className="inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                            <span>{(() => {
-                              const date = toDateSafe(thought.timestamp);
-                              return date ? date.toLocaleString() : 'No date';
-                            })()}</span>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleEdit(thought.id, thought.content)}
-                                className="py-1 px-4 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(thought.id)}
-                                className="py-1 px-4 rounded bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4 opacity-50">💭</div>
+                  <p className="text-neutral-400 text-lg font-light">No thoughts yet</p>
+                  <p className="text-neutral-500 text-sm mt-2">Start sharing your ideas with the world</p>
                 </div>
+              ) : (
+                <Masonry
+                  breakpointCols={{
+                    default: 3,
+                    1200: 2,
+                    900: 2,
+                    600: 1,
+                  }}
+                  className="flex w-auto gap-6"
+                  columnClassName="masonry-column"
+                >
+                  {thoughts.map(thought => (
+                    <DashboardThoughtCard
+                      key={thought.id}
+                      thought={thought}
+                      editingId={editingId}
+                      editContent={editContent}
+                      setEditContent={setEditContent}
+                      handleEdit={handleEdit}
+                      handleEditSave={handleEditSave}
+                      handleEditCancel={handleEditCancel}
+                      handleDelete={handleDelete}
+                    />
+                  ))}
+                </Masonry>
               )}
             </section>
+            <style jsx global>{`
+              .masonry-column {
+                background-clip: padding-box;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+              }
+            `}</style>
             {/* Comments Section */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-green-700 dark:text-green-300 border-b border-green-200 dark:border-green-800 pb-2">Your Comments</h2>
+            <section className="mb-12">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-2 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></div>
+                <h2 className="text-xl font-medium text-neutral-200">Your Comments</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-neutral-700 to-transparent"></div>
+              </div>
               {comments.length === 0 ? (
-                <div className="text-center text-neutral-500 dark:text-neutral-400">You haven't posted any comments yet.</div>
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4 opacity-50">💬</div>
+                  <p className="text-neutral-400 text-lg font-light">No comments yet</p>
+                  <p className="text-neutral-500 text-sm mt-2">Join conversations and share your thoughts</p>
+                </div>
               ) : (
                 <ul className="space-y-4">
                   {comments.map(comment => (
-                    <li key={comment.id} className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
+                    <li key={comment.id} className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 hover:border-neutral-600 transition-all duration-200 group">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-foreground">{comment.pseudonym}</span>
                         <span className="text-xs text-muted-foreground">{comment.timestamp.toLocaleString()}</span>
@@ -253,7 +351,7 @@ export default function DashboardPage() {
                       {editingCommentId === comment.id ? (
                         <>
                           <textarea
-                            className="w-full border rounded px-3 py-2 mb-2 text-base text-foreground bg-neutral-50 dark:bg-neutral-900"
+                            className="w-full border border-neutral-700 rounded-lg px-3 py-2 mb-2 text-base text-foreground bg-neutral-900 focus:border-neutral-500 focus:outline-none transition-colors"
                             value={editCommentContent}
                             onChange={e => setEditCommentContent(e.target.value)}
                             rows={2}
@@ -261,13 +359,13 @@ export default function DashboardPage() {
                           <div className="flex gap-2 mb-2">
                             <button
                               onClick={() => handleEditCommentSave(comment.id)}
-                              className="py-1 px-4 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition"
+                              className="py-2 px-4 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-medium hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm hover:shadow-md"
                             >
                               Save
                             </button>
                             <button
                               onClick={handleEditCommentCancel}
-                              className="py-1 px-4 rounded bg-neutral-300 dark:bg-neutral-700 text-xs font-semibold hover:bg-neutral-400 dark:hover:bg-neutral-600 transition"
+                              className="py-2 px-4 rounded-lg bg-neutral-700 text-neutral-300 text-xs font-medium hover:bg-neutral-600 transition-all duration-200"
                             >
                               Cancel
                             </button>
@@ -279,13 +377,13 @@ export default function DashboardPage() {
                           <div className="flex gap-2 mb-2">
                             <button
                               onClick={() => handleEditComment(comment.id, comment.content)}
-                              className="py-1 px-4 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition"
+                              className="py-1.5 px-3 rounded-lg bg-neutral-700 text-neutral-300 text-xs font-medium hover:bg-neutral-600 hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteComment(comment.id)}
-                              className="py-1 px-4 rounded bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition"
+                              className="py-1.5 px-3 rounded-lg bg-red-900/50 text-red-300 text-xs font-medium hover:bg-red-800 hover:text-red-100 transition-all duration-200 opacity-0 group-hover:opacity-100"
                             >
                               Delete
                             </button>

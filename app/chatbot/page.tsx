@@ -55,7 +55,7 @@ export default function ChatbotPage() {
         <div className="mb-6 flex justify-center">
           <Logo size={24} />
         </div>
-        <div className="mb-8 p-8 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow flex flex-col items-center gap-4">
+        <div className="mb-8 p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow flex flex-col items-center gap-4">
           <span className="text-5xl mb-2">🤖</span>
           <h1 className="text-2xl font-bold mb-1 text-center tracking-tight">ThinkBot coming soon</h1>
           <p className="text-base text-center text-muted-foreground leading-relaxed">
@@ -63,7 +63,7 @@ export default function ChatbotPage() {
           </p>
         </div>
         {/* Voting Section */}
-        <div className="w-full mt-8 p-6 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow flex flex-col items-center gap-4">
+        <div className="w-full mt-8 p-6 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow flex flex-col items-center gap-4">
           <h2 className="text-lg font-semibold text-center mb-2">Do you want ThinkBot?</h2>
           <div className="flex gap-4 mb-2">
             <button

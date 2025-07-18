@@ -9,7 +9,7 @@ import { Thought as ThoughtType } from '@/types'
 import { getThoughts } from '@/lib/firebase-service'
 import { auth } from '@/lib/firebase'
 import { signOut, onAuthStateChanged, User } from 'firebase/auth'
-import CommentSection from '@/components/comment-section';
+import CommentSection from '@/components/comment-section'
 
 type Thought = ThoughtType & { tags?: string[] };
 
@@ -74,15 +74,15 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-neutral-900">
       {showOnboarding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-lg p-8 max-w-md w-full relative">
-            <button
-              className="absolute top-2 right-2 text-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
-              onClick={handleDismissOnboarding}
-              aria-label="Close"
-            >
+          <div className="bg-neutral-900 rounded-xl shadow-lg p-8 max-w-md w-full relative">
+                          <button
+                className="absolute top-2 right-2 text-xl text-neutral-400 hover:text-neutral-200"
+                onClick={handleDismissOnboarding}
+                aria-label="Close"
+              >
               ×
             </button>
             <div className="mb-4 flex justify-center">

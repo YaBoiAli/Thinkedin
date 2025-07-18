@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ToastProvider } from '@/components/toast-provider'
 import Sidebar from '@/components/sidebar'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -24,16 +25,19 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
+          forcedTheme="dark"
         >
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 ml-64 bg-gray-50 dark:bg-neutral-900">
-              {children}
-            </main>
-          </div>
+          <ToastProvider>
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <main className="flex-1 ml-64 bg-neutral-900">
+                {children}
+              </main>
+            </div>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

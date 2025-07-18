@@ -50,7 +50,7 @@ export default function PostsPage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 py-8">
+    <div className="min-h-screen bg-neutral-900 py-8">
       <div className="container mx-auto max-w-6xl px-4">
         {/* Tab bar */}
         <div className="flex justify-center mb-8 gap-2">
@@ -82,7 +82,7 @@ export default function PostsPage() {
             <div className="mb-6 flex justify-center">
               <input
                 type="text"
-                className="w-full max-w-xl border border-neutral-200 dark:border-neutral-700 rounded px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                className="w-full max-w-xl border border-neutral-700 rounded px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 bg-neutral-800 text-neutral-100"
                 placeholder="Search posts by content or tag..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -116,6 +116,8 @@ export default function PostsPage() {
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
               }
             `}</style>
           </>
