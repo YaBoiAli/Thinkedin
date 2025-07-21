@@ -3,15 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
+import {
+  doc,
+  onSnapshot,
+  getDocs,
+  query,
+  where,
+  collection,
+  setDoc,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Logo } from '@/components/logo';
-import { Timestamp } from "firebase/firestore";
-
-
-// Import the main app content
-import MainApp from '@/components/main-app';
+import { Logo } from "@/components/logo";
+import MainApp from "@/components/main-app";
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -24,34 +35,48 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+
+      if (!firebaseUser) {
+        // No user signed in, reset states
+        setUsername(null);
+        setShowUsernamePrompt(false);
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
+      // User signed in, set up real-time listener on user doc
       setLoading(true);
-      
-      if (firebaseUser) {
-        try {
-          // Check if user has a username in Firestore
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-          if (userDoc.exists() && userDoc.data().username) {
-            setUsername(userDoc.data().username);
-            setIsAuthenticated(true);
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+
+      const unsubscribeUserDoc = onSnapshot(
+        userDocRef,
+        (docSnap) => {
+          if (docSnap.exists() && docSnap.data().username) {
+            setUsername(docSnap.data().username);
             setShowUsernamePrompt(false);
+            setIsAuthenticated(true);
           } else {
+            setUsername(null);
             setShowUsernamePrompt(true);
             setIsAuthenticated(false);
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error listening to user document:", error);
           setError("Failed to load user data");
+          setLoading(false);
         }
-      } else {
-        setIsAuthenticated(false);
-        setShowUsernamePrompt(false);
-        setUsername(null);
-      }
-      setLoading(false);
+      );
+
+      // Cleanup user doc listener on unmount or user change
+      return () => unsubscribeUserDoc();
     });
-    return () => unsubscribe();
+
+    return () => unsubscribeAuth();
   }, []);
 
   const handleGoogleSignIn = async () => {
@@ -60,7 +85,7 @@ export default function HomePage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // User is now signed in, onAuthStateChanged will handle the rest
+      // onAuthStateChanged will handle rest
     } catch (err: any) {
       console.error("Sign-in error:", err);
       setError(err?.message || "An error occurred during sign-in. Please try again.");
@@ -73,7 +98,7 @@ export default function HomePage() {
     e.preventDefault();
     setError("");
     setAuthLoading(true);
-    
+
     try {
       if (!usernameInput.trim()) {
         setError("Username is required.");
@@ -87,35 +112,35 @@ export default function HomePage() {
         return;
       }
 
-      // Check for duplicate username
+      // Check if username is taken
       const q = query(collection(db, "users"), where("username", "==", usernameInput.trim()));
       const snapshot = await getDocs(q);
-      
+
       if (!snapshot.empty) {
         setError("Username is already taken. Please choose a different one.");
         setAuthLoading(false);
         return;
       }
 
-      // Save username to Firestore
+      // Save username
       if (user) {
-        console.log("user.uid:", user?.uid);
-        console.log("user.email:", user?.email);
-        console.log("Firestore path:", `users/${user?.uid}`);
-        await setDoc(doc(db, "users", user.uid), {
-          username: usernameInput.trim(),
-          email: user.email || null,
-          displayName: user.displayName || null,
-          photoURL: user.photoURL || null,
-          createdAt: Timestamp.now(),
-        }, { merge: true }); // Allow update as well as create
-        console.log("Username set successfully");
-        setUsername(usernameInput.trim());
-        setShowUsernamePrompt(false);
-        setIsAuthenticated(true);
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            username: usernameInput.trim(),
+            email: user.email || null,
+            displayName: user.displayName || null,
+            photoURL: user.photoURL || null,
+            createdAt: Timestamp.now(),
+          },
+          { merge: true }
+        );
+        console.log("Username set successfully in Firestore");
+
+        // No need to manually update UI here since onSnapshot listener handles it
       }
     } catch (err: any) {
-      console.error("Username setup error:", err);
+      console.error("Error setting username:", err);
       setError(err?.message || "Failed to set username. Please try again.");
     } finally {
       setAuthLoading(false);
@@ -139,7 +164,6 @@ export default function HomePage() {
     }
   };
 
-  // Show loading screen while checking auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
@@ -153,7 +177,6 @@ export default function HomePage() {
     );
   }
 
-  // If user is authenticated, show the main app
   if (isAuthenticated && user && username) {
     return <MainApp />;
   }
