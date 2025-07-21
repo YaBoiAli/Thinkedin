@@ -37,6 +37,7 @@ export default function HomePage() {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+      console.log("new version");
 
       if (!firebaseUser) {
         // No user signed in, reset states
