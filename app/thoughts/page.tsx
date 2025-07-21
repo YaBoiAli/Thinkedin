@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { collection, getDocs, orderBy, query, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Thought } from "@/types";
@@ -13,6 +13,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 export default function ThoughtsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const thoughtId = searchParams.get('id');
   
   const [thoughts, setThoughts] = useState<Thought[]>([]);
@@ -33,6 +34,16 @@ export default function ThoughtsPage() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  // Redirect /thoughts/[id] to /thoughts?id=... for static hosting
+  useEffect(() => {
+    // If the path is /thoughts/[id], redirect to /thoughts?id=[id]
+    const match = pathname.match(/^\/thoughts\/([A-Za-z0-9_-]+)$/);
+    if (match && !thoughtId) {
+      const id = match[1];
+      router.replace(`/thoughts?id=${id}`);
+    }
+  }, [pathname, thoughtId, router]);
 
   useEffect(() => {
     if (!user) return;
