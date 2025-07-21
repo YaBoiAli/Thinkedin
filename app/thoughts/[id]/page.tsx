@@ -1,33 +1,27 @@
 import { notFound } from 'next/navigation';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { initializeApp, getApps } from 'firebase/app';
 import { Thought } from '@/types';
 import { ThoughtCard } from '@/components/thought-card';
 import CommentSection from '@/components/comment-section';
+import * as admin from 'firebase-admin';
 
-// Firebase config from env vars
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
+// Initialize Firebase Admin SDK only once
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) : undefined;
+if (!admin.apps.length && serviceAccount) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
-const db = getFirestore();
+const db = admin.firestore();
 
 export default async function ThoughtDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  const docRef = doc(db, 'thoughts', id);
-  const docSnap = await getDoc(docRef);
+  const docRef = db.collection('thoughts').doc(id);
+  const docSnap = await docRef.get();
 
-  if (!docSnap.exists()) {
+  if (!docSnap.exists) {
     notFound();
   }
-  const data = docSnap.data();
+  const data = docSnap.data()!;
   const thought: Thought = {
     id: docSnap.id,
     content: data.content || '',
