@@ -37,7 +37,6 @@ export default function HomePage() {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      console.log("new version");
 
       if (!firebaseUser) {
         // No user signed in, reset states
@@ -240,7 +239,7 @@ export default function HomePage() {
             <div className="text-left text-sm text-neutral-600 space-y-2">
               <p>🧠 <strong>Share thoughts</strong> - What's been on your mind?</p>
               <p>❓ <strong>Ask questions</strong> - What are you curious about?</p>
-              <p>📜 <strong>Tell stories</strong> - Share experiences anonymously</p>
+              <p>📜 <strong>Tel stories</strong> - Share experiences anonymously</p>
               <p>🔥 <strong>Speak truth</strong> - Say what needs to be said</p>
             </div>
             
