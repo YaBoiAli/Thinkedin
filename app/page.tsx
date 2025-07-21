@@ -7,6 +7,8 @@ import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User 
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Logo } from '@/components/logo';
+import { Timestamp } from "firebase/firestore";
+
 
 // Import the main app content
 import MainApp from '@/components/main-app';
@@ -97,14 +99,17 @@ export default function HomePage() {
 
       // Save username to Firestore
       if (user) {
+        console.log("user.uid:", user?.uid);
+        console.log("user.email:", user?.email);
+        console.log("Firestore path:", `users/${user?.uid}`);
         await setDoc(doc(db, "users", user.uid), {
           username: usernameInput.trim(),
           email: user.email || null,
           displayName: user.displayName || null,
           photoURL: user.photoURL || null,
-          createdAt: new Date(),
-        });
-        
+          createdAt: Timestamp.now(),
+        }, { merge: true }); // Allow update as well as create
+        console.log("Username set successfully");
         setUsername(usernameInput.trim());
         setShowUsernamePrompt(false);
         setIsAuthenticated(true);
