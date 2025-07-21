@@ -21,6 +21,7 @@ export default async function ThoughtDetailPage({ params }: { params: { id: stri
   if (!docSnap.exists) {
     notFound();
   }
+  
   const data = docSnap.data()!;
   const thought: Thought = {
     id: docSnap.id,
