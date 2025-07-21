@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['firebase'],
-  output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true
@@ -11,14 +10,12 @@ const nextConfig = {
       ...config.resolve.alias,
       undici: false, // ⛔️ Block undici completely
     };
-
     config.module.rules.push({
       test: /\.m?js$/,
       resolve: {
         fullySpecified: false,
       },
     });
-
     return config;
   },
 };

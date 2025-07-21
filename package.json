@@ -6,10 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "deploy": "vercel",
-    "build:firebase": "next build && node scripts/copy-static-export.js",
-    "deploy:firebase": "npm run build:firebase && firebase deploy --only hosting"
+    "lint": "next lint"
   },
   "dependencies": {
     "clsx": "^2.0.0",
