@@ -119,14 +119,7 @@ export default function MainApp() {
             </div>
             
             {user && (
-              <div className="mt-4 sm:mt-0">
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg transition"
-                >
-                  Sign Out
-                </button>
-              </div>
+              <div className="mt-4 sm:mt-0"></div>
             )}
           </div>
         </header>
