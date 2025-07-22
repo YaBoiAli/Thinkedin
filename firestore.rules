@@ -9,18 +9,19 @@
                       && request.resource.data.content.size() <= 1000
                       && request.resource.data.pseudonym is string
                       && (request.resource.data.timestamp == request.time || request.resource.data.timestamp is timestamp);
-         allow update: if false;
+         // Allow reaction updates for authenticated users
+         allow update: if request.auth != null 
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
          allow delete: if false;
        }
        match /comments/{commentId} {
          allow read: if request.auth != null;
+         // Simplified rule for debugging - just require auth and basic fields
          allow create: if request.auth != null
                       && request.resource.data.content is string 
                       && request.resource.data.content.size() > 0 
                       && request.resource.data.content.size() <= 500
-                      && request.resource.data.pseudonym is string
-                      && request.resource.data.thoughtId is string
-                      && (request.resource.data.timestamp == request.time || request.resource.data.timestamp is timestamp);
+                      && request.resource.data.thoughtId is string;
          allow update: if false;
          allow delete: if false;
        }
