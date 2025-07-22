@@ -46,5 +46,13 @@
 
           allow delete: if false;
         }
+        match /chatbot_votes/{voteId} {
+          // Allow authenticated users to read all votes and create/update their own votes
+          allow read: if request.auth != null;
+          allow create, update: if request.auth != null
+                               && request.resource.data.pseudonym is string
+                               && request.resource.data.vote in ['want', 'dont'];
+          allow delete: if false;
+        }
      }
    }

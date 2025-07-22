@@ -4,13 +4,18 @@ import { usePathname } from "next/navigation";
 import { FaHome, FaUser, FaRobot } from "react-icons/fa";
 import { FaHashtag } from "react-icons/fa";
 import { Logo } from './logo';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { FiLogOut } from 'react-icons/fi';
 
 export default function Sidebar() {
   const pathname = usePathname();
   return (
     <aside className="h-screen w-64 bg-neutral-900 text-neutral-100 flex flex-col py-8 px-4 shadow-xl border-r border-neutral-800 fixed left-0 top-0 z-20">
       <div className="mb-10 flex items-center gap-3">
-        <Logo size={48} />
+        <Link href="/">
+          <Logo size={48} className="cursor-pointer hover:opacity-80 transition" />
+        </Link>
       </div>
       <nav className="flex flex-col gap-2 flex-1">
         <SidebarLink href="/" icon={<FaHome />} active={pathname === "/"}>
@@ -33,6 +38,15 @@ export default function Sidebar() {
         </div>
         <p className="opacity-80">Ask for advice, stories, or find posts about your needs. Try: <span className="italic">"motivation"</span></p>
       </div>
+      {/* Sign Out Button */}
+      <button
+        onClick={async () => { await signOut(auth); }}
+        className="mt-8 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-base transition-colors shadow focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+        style={{ marginTop: 'auto' }}
+      >
+        <FiLogOut className="text-lg" />
+        Sign Out
+      </button>
     </aside>
   );
 }
