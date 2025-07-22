@@ -36,7 +36,7 @@ export default async function ThoughtDetailPage({ params }: { params: { id: stri
   return (
     <div className="min-h-screen flex flex-col items-center py-12 px-4 bg-neutral-50 dark:bg-neutral-900">
       <div className="w-full max-w-2xl mx-auto">
-        <ThoughtCard thought={thought} onThoughtsUpdate={() => {}} />
+        <ThoughtCard thought={thought} />
         <div className="mt-8">
           <CommentSection thoughtId={thought.id} />
         </div>

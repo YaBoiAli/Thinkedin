@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 interface ThoughtCardProps {
   thought: Thought
-  onThoughtsUpdate: () => void
+  onThoughtsUpdate?: () => void
 }
 
 // Helper for post type emoji and label
