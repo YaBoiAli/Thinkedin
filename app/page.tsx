@@ -19,6 +19,7 @@ import {
   collection,
   setDoc,
   Timestamp,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Logo } from "@/components/logo";
@@ -47,33 +48,52 @@ export default function HomePage() {
         return;
       }
 
-      // User signed in, set up real-time listener on user doc
+      // User signed in, check if user document exists
       setLoading(true);
       const userDocRef = doc(db, "users", firebaseUser.uid);
+      let unsubscribeUserDoc: (() => void) | null = null;
 
-      const unsubscribeUserDoc = onSnapshot(
-        userDocRef,
-        (docSnap) => {
+      // First, try to get the document once to see if it exists
+      getDoc(userDocRef)
+        .then((docSnap) => {
           if (docSnap.exists() && docSnap.data().username) {
+            // User doc exists with username, set up listener
             setUsername(docSnap.data().username);
             setShowUsernamePrompt(false);
             setIsAuthenticated(true);
+            setLoading(false);
+            
+            // Set up real-time listener for future updates
+            unsubscribeUserDoc = onSnapshot(userDocRef, (updatedDocSnap) => {
+              if (updatedDocSnap.exists() && updatedDocSnap.data().username) {
+                setUsername(updatedDocSnap.data().username);
+                setShowUsernamePrompt(false);
+                setIsAuthenticated(true);
+              }
+            });
           } else {
+            // User doc doesn't exist or no username, show username prompt
             setUsername(null);
             setShowUsernamePrompt(true);
             setIsAuthenticated(false);
+            setLoading(false);
           }
+        })
+        .catch((error) => {
+          console.error("Error checking user document:", error);
+          // If we can't read the doc, assume it doesn't exist and show username prompt
+          setUsername(null);
+          setShowUsernamePrompt(true);
+          setIsAuthenticated(false);
           setLoading(false);
-        },
-        (error) => {
-          console.error("Error listening to user document:", error);
-          setError("Failed to load user data");
-          setLoading(false);
-        }
-      );
+        });
 
       // Cleanup user doc listener on unmount or user change
-      return () => unsubscribeUserDoc();
+      return () => {
+        if (unsubscribeUserDoc) {
+          unsubscribeUserDoc();
+        }
+      };
     });
 
     return () => unsubscribeAuth();
