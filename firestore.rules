@@ -9,10 +9,11 @@
                       && request.resource.data.content.size() <= 1000
                       && request.resource.data.pseudonym is string
                       && (request.resource.data.timestamp == request.time || request.resource.data.timestamp is timestamp);
-         // Allow reaction updates for authenticated users
+         // Allow reaction updates for authenticated users, and content updates by owner
          allow update: if request.auth != null 
-                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
-         allow delete: if false;
+                      && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+                          || request.auth.uid == resource.data.uid);
+         allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
        }
        match /comments/{commentId} {
          allow read: if request.auth != null;
@@ -22,8 +23,9 @@
                       && request.resource.data.content.size() > 0 
                       && request.resource.data.content.size() <= 500
                       && request.resource.data.thoughtId is string;
-         allow update: if false;
-         allow delete: if false;
+         // Allow users to update and delete their own comments
+         allow update: if request.auth != null && request.auth.uid == resource.data.uid;
+         allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
        }
         match /users/{userId} {
           // Allow signed-in users to read, create, and update their own user document

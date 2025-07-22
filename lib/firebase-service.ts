@@ -99,35 +99,20 @@ export async function createComment(data: CommentFormData): Promise<string> {
   const auth = getAuth();
   const currentUser = auth.currentUser;
 
+  if (!currentUser) {
+    throw new Error('You must be signed in to comment');
+  }
+
   const commentData = {
     content: sanitizedContent,
     pseudonym: generateRandomPseudonym(),
     timestamp: serverTimestamp(),
     thoughtId: data.thoughtId,
-    uid: currentUser ? currentUser.uid : null,
+    uid: currentUser.uid,
   };
 
   const docRef = await addDoc(collection(db, COMMENTS_COLLECTION), commentData);
   
-  // Fetch the created comment to get the resolved timestamp
-  const createdCommentSnap = await getDocs(query(collection(db, COMMENTS_COLLECTION)));
-  let createdComment: any = null;
-  createdCommentSnap.forEach((docSnap) => {
-    if (docSnap.id === docRef.id) createdComment = docSnap.data();
-  });
-  // Update the thought document to include the comment with resolved timestamp
-  const thoughtRef = doc(db, THOUGHTS_COLLECTION, data.thoughtId);
-  await updateDoc(thoughtRef, {
-    comments: arrayUnion({
-      id: docRef.id,
-      content: sanitizedContent,
-      pseudonym: commentData.pseudonym,
-      timestamp: createdComment?.timestamp || new Date(),
-      thoughtId: data.thoughtId,
-      uid: commentData.uid,
-    })
-  });
-
   return docRef.id;
 }
 
