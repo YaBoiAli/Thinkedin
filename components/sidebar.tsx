@@ -38,16 +38,6 @@ export default function Sidebar() {
         </div>
         <p className="opacity-80">Ask for advice, stories, or find posts about your needs. Try: <span className="italic">"motivation"</span></p>
       </div>
-      {/* Minimal Sign Out Button */}
-      <div className="flex justify-center items-center w-full mt-6" style={{ marginTop: 'auto' }}>
-        <button
-          onClick={async () => { await signOut(auth); }}
-          title="Sign Out"
-          className="p-3 rounded-full hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400"
-        >
-          <FiLogOut className="text-2xl" />
-        </button>
-      </div>
     </aside>
   );
 }

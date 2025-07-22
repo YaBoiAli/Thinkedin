@@ -8,6 +8,7 @@ import { Thought as ThoughtType } from '@/types'
 import { getThoughts } from '@/lib/firebase-service'
 import { auth } from '@/lib/firebase'
 import { signOut, onAuthStateChanged, User } from 'firebase/auth'
+import { FiLogOut } from 'react-icons/fi';
 
 type Thought = ThoughtType & { tags?: string[] };
 
@@ -72,6 +73,16 @@ export default function MainApp() {
 
   return (
     <div className="min-h-screen bg-neutral-900">
+      {user && (
+        <button
+          onClick={handleLogout}
+          title="Sign Out"
+          className="fixed top-4 right-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-transparent border-2 border-red-600 hover:border-red-700 transition-colors focus:outline-none"
+          style={{ boxShadow: 'none' }}
+        >
+          <FiLogOut className="text-2xl text-red-600 hover:text-red-700 transition-colors" />
+        </button>
+      )}
       {showOnboarding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-neutral-900 rounded-xl shadow-lg p-8 max-w-md w-full relative">
@@ -117,10 +128,7 @@ export default function MainApp() {
                 A creative, anonymous space to share, discover, and get inspired by real stories, advice, and thoughts from people like you.
               </p>
             </div>
-            
-            {user && (
-              <div className="mt-4 sm:mt-0"></div>
-            )}
+            {/* Remove any sign out button here */}
           </div>
         </header>
         
