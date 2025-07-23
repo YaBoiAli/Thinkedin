@@ -33,7 +33,7 @@ export default function RootLayout({
           <ToastProvider>
             <div className="flex min-h-screen">
               <Sidebar />
-              <main className="flex-1 ml-64 bg-neutral-900">
+              <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 bg-neutral-900">
                 {children}
               </main>
             </div>
