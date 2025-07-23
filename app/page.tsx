@@ -51,33 +51,22 @@ export default function HomePage() {
       // User signed in, check if user document exists
       setLoading(true);
       const userDocRef = doc(db, "users", firebaseUser.uid);
-      let unsubscribeUserDoc: (() => void) | null = null;
 
       // First, try to get the document once to see if it exists
       getDoc(userDocRef)
         .then((docSnap) => {
           if (docSnap.exists() && docSnap.data().username) {
-            // User doc exists with username, set up listener
+            // User doc exists with username
             setUsername(docSnap.data().username);
             setShowUsernamePrompt(false);
             setIsAuthenticated(true);
-            setLoading(false);
-            
-            // Set up real-time listener for future updates
-            unsubscribeUserDoc = onSnapshot(userDocRef, (updatedDocSnap) => {
-              if (updatedDocSnap.exists() && updatedDocSnap.data().username) {
-                setUsername(updatedDocSnap.data().username);
-                setShowUsernamePrompt(false);
-                setIsAuthenticated(true);
-              }
-            });
           } else {
             // User doc doesn't exist or no username, show username prompt
             setUsername(null);
             setShowUsernamePrompt(true);
             setIsAuthenticated(false);
-            setLoading(false);
           }
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error checking user document:", error);
@@ -87,13 +76,6 @@ export default function HomePage() {
           setIsAuthenticated(false);
           setLoading(false);
         });
-
-      // Cleanup user doc listener on unmount or user change
-      return () => {
-        if (unsubscribeUserDoc) {
-          unsubscribeUserDoc();
-        }
-      };
     });
 
     return () => unsubscribeAuth();
@@ -142,23 +124,22 @@ export default function HomePage() {
         return;
       }
 
-      // Save username
+      // Save username (user is guaranteed to exist since they passed Google auth)
       if (user) {
         await setDoc(
           doc(db, "users", user.uid),
           {
             username: usernameInput.trim(),
-            email: user.email || null,
-            displayName: user.displayName || null,
-            photoURL: user.photoURL || null,
             createdAt: Timestamp.now(),
-          },
-          { merge: true }
+          }
         );
-        console.log("Username set successfully in Firestore");
-
-        // No need to manually update UI here since onSnapshot listener handles it
       }
+
+      // Update UI immediately
+      setUsername(usernameInput.trim());
+      setShowUsernamePrompt(false);
+      setIsAuthenticated(true);
+      
     } catch (err: any) {
       console.error("Error setting username:", err);
       setError(err?.message || "Failed to set username. Please try again.");

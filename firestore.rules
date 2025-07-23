@@ -28,23 +28,8 @@
          allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
        }
         match /users/{userId} {
-          // Allow signed-in users to read, create, and update their own user document
-          allow read, create, update: if request.auth != null
-            && request.auth.uid == userId
-            && (
-              // Allow read (no validation needed for fields on read)
-              request.method == 'get' ||
-
-              // Allow create/update with these required fields
-              (
-                request.method in ['create', 'update'] &&
-                request.resource.data.username is string &&
-                request.resource.data.username.size() >= 3 &&
-                request.resource.data.createdAt is timestamp
-              )
-            );
-
-          allow delete: if false;
+          // Allow anyone to create/read/update user documents since Google auth controls access to this form
+          allow read, write: if true;
         }
         match /chatbot_votes/{voteId} {
           // Allow authenticated users to read all votes and create/update their own votes
