@@ -11,9 +11,10 @@ interface CommentSectionProps {
   thoughtId: string;
   onBack?: () => void;
   showBackButton?: boolean;
+  onCommentCountChange?: (count: number) => void;
 }
 
-export default function CommentSection({ thoughtId, onBack, showBackButton = false }: CommentSectionProps) {
+export default function CommentSection({ thoughtId, onBack, showBackButton = false, onCommentCountChange }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +24,10 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
   const reloadComments = () => {
     setLoading(true);
     getComments(thoughtId)
-      .then(setComments)
+      .then((newComments) => {
+        setComments(newComments);
+        onCommentCountChange?.(newComments.length);
+      })
       .catch(() => setError("Failed to load comments."))
       .finally(() => setLoading(false));
   };
@@ -49,7 +53,9 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
       const comment = comments.find(c => c.id === commentId);
       if (!comment || !currentUserUid) return;
       await deleteComment(commentId, thoughtId, currentUserUid);
-      setComments(comments => comments.filter(c => c.id !== commentId));
+      const newComments = comments.filter(c => c.id !== commentId);
+      setComments(newComments);
+      onCommentCountChange?.(newComments.length);
     } catch {
       setError('Failed to delete comment.');
     }
@@ -94,7 +100,10 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
         <div className="mb-6">
           <CommentForm
             thoughtId={thoughtId}
-            onCommentCreated={() => { setShowForm(false); reloadComments(); }}
+            onCommentCreated={() => { 
+              setShowForm(false); 
+              reloadComments(); 
+            }}
             onCancel={() => setShowForm(false)}
           />
         </div>

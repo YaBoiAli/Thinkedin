@@ -27,6 +27,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
   const [showComments, setShowComments] = useState(false)
   const [reactions, setReactions] = useState(thought.reactions || { inspired: 0, think: 0, relatable: 0, following: 0 });
   const [userReactions, setUserReactions] = useState<{ [key: string]: boolean }>({});
+  const [commentCount, setCommentCount] = useState(thought.comments?.length || 0);
 
   // Randomize content length per card - Pinterest style
   const [showFull, setShowFull] = useState(false);
@@ -42,9 +43,11 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
     // Load user reactions from localStorage
     const stored = localStorage.getItem(`thinkedin_reactions_${thought.id}`);
     if (stored) setUserReactions(JSON.parse(stored));
-    // Subscribe to Firestore for real-time reaction updates
+    
+    // Subscribe to Firestore for real-time updates
     const unsubscribe = subscribeToThought(thought.id, (updated) => {
       if (updated.reactions) setReactions(updated.reactions);
+      if (updated.comments) setCommentCount(updated.comments.length);
     });
     return () => unsubscribe();
   }, [thought.id]);
@@ -152,7 +155,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
         >
           <MessageCircle className="h-4 w-4" />
           <span>
-            {thought.comments.length} comment{thought.comments.length !== 1 ? 's' : ''}
+            {commentCount} comment{commentCount !== 1 ? 's' : ''}
           </span>
           {showComments ? (
             <ChevronUp className="h-4 w-4" />
@@ -166,6 +169,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
               thoughtId={thought.id}
               showBackButton={true}
               onBack={() => setShowComments(false)}
+              onCommentCountChange={setCommentCount}
             />
           </div>
         )}
