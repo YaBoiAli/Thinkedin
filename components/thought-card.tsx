@@ -6,7 +6,7 @@ import { Thought } from '@/types'
 import { formatTimestamp } from '@/lib/utils'
 import CommentSection from './comment-section'
 import { cn } from '@/lib/utils'
-import { updateReactionCount, subscribeToThought } from '@/lib/firebase-service';
+import { updateReactionCount, subscribeToThought, getComments } from '@/lib/firebase-service';
 import { useRouter } from 'next/navigation';
 
 interface ThoughtCardProps {
@@ -27,7 +27,7 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
   const [showComments, setShowComments] = useState(false)
   const [reactions, setReactions] = useState(thought.reactions || { inspired: 0, think: 0, relatable: 0, following: 0 });
   const [userReactions, setUserReactions] = useState<{ [key: string]: boolean }>({});
-  const [commentCount, setCommentCount] = useState(thought.comments?.length || 0);
+  const [commentCount, setCommentCount] = useState(0);
 
   // Randomize content length per card - Pinterest style
   const [showFull, setShowFull] = useState(false);
@@ -39,15 +39,35 @@ export function ThoughtCard({ thought, onThoughtsUpdate }: ThoughtCardProps) {
   const isTruncated = !showFull && thought.content.length > maxLen;
   const displayContent = showFull ? thought.content : thought.content.slice(0, maxLen);
 
+  // Helper function to count all comments including nested replies
+  const countAllComments = (comments: any[]): number => {
+    let count = 0;
+    comments.forEach(comment => {
+      count += 1; // Count the comment itself
+      if (comment.replies && comment.replies.length > 0) {
+        count += countAllComments(comment.replies); // Recursively count replies
+      }
+    });
+    return count;
+  };
+
   useEffect(() => {
     // Load user reactions from localStorage
     const stored = localStorage.getItem(`thinkedin_reactions_${thought.id}`);
     if (stored) setUserReactions(JSON.parse(stored));
     
+    // Load initial comment count
+    getComments(thought.id).then(comments => {
+      const totalCount = countAllComments(comments);
+      setCommentCount(totalCount);
+    }).catch(() => {
+      setCommentCount(0);
+    });
+    
     // Subscribe to Firestore for real-time updates
     const unsubscribe = subscribeToThought(thought.id, (updated) => {
       if (updated.reactions) setReactions(updated.reactions);
-      if (updated.comments) setCommentCount(updated.comments.length);
+      // Note: Comment count will be updated via onCommentCountChange callback from CommentSection
     });
     return () => unsubscribe();
   }, [thought.id]);
