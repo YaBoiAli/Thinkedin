@@ -80,11 +80,11 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           {showBackButton && onBack && (
-            <button
-              onClick={onBack}
-              className="flex items-center justify-center w-8 h-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Back"
-            >
+                         <button
+               onClick={onBack}
+                              className="flex items-center justify-center w-8 h-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors duration-200 focus:outline-none select-none"
+               aria-label="Back"
+             >
               <ArrowLeft className="h-4 w-4" />
             </button>
           )}
@@ -98,10 +98,10 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
         </div>
         
         {!showForm && (
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            onClick={() => setShowForm(true)}
-          >
+                     <button
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none select-none"
+             onClick={() => setShowForm(true)}
+           >
             <Plus className="h-4 w-4" />
             Add Comment
           </button>

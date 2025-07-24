@@ -101,7 +101,7 @@ export default function PostsPage() {
               ) : (
                 <Masonry
                   breakpointCols={{ default: 4, 1200: 3, 900: 2, 600: 1 }}
-                  className="flex w-auto gap-6"
+                  className="flex w-auto gap-4"
                   columnClassName="masonry-column"
                 >
                   {filteredThoughts.map(thought => (
@@ -115,7 +115,7 @@ export default function PostsPage() {
                 background-clip: padding-box;
                 display: flex;
                 flex-direction: column;
-                gap: 1.5rem;
+                gap: 0.75rem;
                 overflow-wrap: break-word;
                 word-wrap: break-word;
               }

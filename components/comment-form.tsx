@@ -59,7 +59,7 @@ export function CommentForm({ thoughtId, onCommentCreated, onCancel }: CommentFo
             className={cn(
               "w-full min-h-[100px] p-4 border-2 border-neutral-200 dark:border-neutral-700 rounded-lg resize-none",
               "bg-neutral-50 dark:bg-neutral-900 text-foreground placeholder:text-neutral-500",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+              "focus:outline-none",
               "transition-all duration-200",
               "shadow-sm hover:shadow-md"
             )}
@@ -77,33 +77,33 @@ export function CommentForm({ thoughtId, onCommentCreated, onCancel }: CommentFo
           </p>
           
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
-                "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200",
-                "hover:bg-neutral-100 dark:hover:bg-neutral-800",
-                "focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
-              )}
-            >
+                         <button
+               type="button"
+               onClick={onCancel}
+               disabled={isSubmitting}
+               className={cn(
+                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
+                 "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200",
+                 "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                 "focus:outline-none select-none",
+                 "disabled:opacity-50 disabled:cursor-not-allowed"
+               )}
+             >
               <X className="h-4 w-4" />
               Cancel
             </button>
             
-            <button
-              type="submit"
-              disabled={!content.trim() || isSubmitting}
-              className={cn(
-                "flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-sm",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                "transform hover:scale-105 active:scale-95"
-              )}
-            >
+                         <button
+               type="submit"
+               disabled={!content.trim() || isSubmitting}
+               className={cn(
+                 "flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                 "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md",
+                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-sm",
+                 "focus:outline-none select-none",
+                 "transform hover:scale-105 active:scale-95"
+               )}
+             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>

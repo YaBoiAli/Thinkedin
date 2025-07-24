@@ -144,7 +144,7 @@ export function CommentItem({ comment, currentUserUid, onEdit, onDelete, onReply
             className={cn(
               "w-full min-h-[80px] p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg",
               "bg-neutral-50 dark:bg-neutral-900 text-foreground placeholder:text-neutral-500",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              "focus:outline-none",
               "transition-colors resize-none"
             )}
             value={editContent}
