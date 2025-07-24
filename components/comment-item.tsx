@@ -3,28 +3,38 @@
 import { Comment } from '@/types'
 import { useState } from 'react'
 import { formatTimestamp } from '@/lib/utils'
-import { MoreVertical, Pencil, Trash2, Save, X } from 'lucide-react'
+import { MoreVertical, Pencil, Trash2, Save, X, Reply } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ReplyForm } from './reply-form'
 
 interface CommentItemProps {
   comment: Comment
   currentUserUid?: string
   onEdit: (commentId: string, newContent: string) => void
   onDelete: (commentId: string) => void
+  onReplyCreated?: () => void
+  depth?: number
 }
 
-export function CommentItem({ comment, currentUserUid, onEdit, onDelete }: CommentItemProps) {
+export function CommentItem({ comment, currentUserUid, onEdit, onDelete, onReplyCreated, depth = 0 }: CommentItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showReplyForm, setShowReplyForm] = useState(false)
 
   const isAuthor = currentUserUid && comment.uid && currentUserUid === comment.uid
+  const maxDepth = 3 // Maximum nesting level
 
   const handleSave = () => {
     if (editContent.trim() && editContent !== comment.content) {
       onEdit(comment.id, editContent.trim())
       setIsEditing(false)
     }
+  }
+
+  const handleReplyCreated = () => {
+    setShowReplyForm(false)
+    onReplyCreated?.()
   }
 
   // Generate a consistent color for the avatar based on pseudonym
@@ -54,23 +64,28 @@ export function CommentItem({ comment, currentUserUid, onEdit, onDelete }: Comme
 
   return (
     <div className={cn(
-      "group relative bg-neutral-50 dark:bg-neutral-800/50 rounded-xl p-4 border border-neutral-200 dark:border-neutral-700/50",
-      "hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-all duration-200",
-      "hover:shadow-sm hover:border-neutral-300 dark:hover:border-neutral-600"
+      "group relative rounded-xl border transition-all duration-200",
+      depth === 0 
+        ? "bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700/50 p-4 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 hover:shadow-sm hover:border-neutral-300 dark:hover:border-neutral-600"
+        : "bg-neutral-25 dark:bg-neutral-800/30 border-neutral-150 dark:border-neutral-700/30 p-3 ml-8 hover:bg-neutral-75 dark:hover:bg-neutral-800/50"
     )}>
       {/* Comment header */}
       <div className="flex items-start gap-3 mb-3">
         <div className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm",
+          "rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm",
           "bg-gradient-to-br",
-          getAvatarColor(comment.pseudonym || 'Anonymous')
+          getAvatarColor(comment.pseudonym || 'Anonymous'),
+          depth === 0 ? "w-8 h-8" : "w-6 h-6 text-xs"
         )}>
           {getInitials(comment.pseudonym || 'A')}
         </div>
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-foreground truncate">
+            <p className={cn(
+              "font-semibold text-foreground truncate",
+              depth === 0 ? "text-sm" : "text-xs"
+            )}>
               {comment.pseudonym}
             </p>
             <span className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -161,10 +176,59 @@ export function CommentItem({ comment, currentUserUid, onEdit, onDelete }: Comme
           </div>
         </div>
       ) : (
-        <div className="pl-11">
-          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+        <div className={cn(depth === 0 ? "pl-11" : "pl-9")}>
+          <p className={cn(
+            "text-foreground leading-relaxed whitespace-pre-wrap",
+            depth === 0 ? "text-sm" : "text-xs"
+          )}>
             {comment.content}
           </p>
+          
+          {/* Reply button */}
+          {depth < maxDepth && !isEditing && (
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={() => setShowReplyForm(!showReplyForm)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors duration-200",
+                  "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200",
+                  "hover:bg-neutral-100 dark:hover:bg-neutral-700",
+                  "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                )}
+              >
+                <Reply className="h-3 w-3" />
+                Reply
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reply form */}
+      {showReplyForm && (
+        <ReplyForm
+          thoughtId={comment.thoughtId}
+          parentId={comment.id}
+          parentAuthor={comment.pseudonym}
+          onReplyCreated={handleReplyCreated}
+          onCancel={() => setShowReplyForm(false)}
+        />
+      )}
+
+      {/* Nested replies */}
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {comment.replies.map(reply => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              currentUserUid={currentUserUid}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onReplyCreated={onReplyCreated}
+              depth={depth + 1}
+            />
+          ))}
         </div>
       )}
     </div>

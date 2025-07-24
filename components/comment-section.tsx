@@ -26,11 +26,26 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
     getComments(thoughtId)
       .then((newComments) => {
         setComments(newComments);
-        onCommentCountChange?.(newComments.length);
+        // Count total comments including replies
+        const totalCount = countAllComments(newComments);
+        onCommentCountChange?.(totalCount);
       })
       .catch(() => setError("Failed to load comments."))
       .finally(() => setLoading(false));
   };
+
+  // Helper function to count all comments including nested replies
+  const countAllComments = (comments: Comment[]): number => {
+    let count = 0;
+    comments.forEach(comment => {
+      count += 1; // Count the comment itself
+      if (comment.replies && comment.replies.length > 0) {
+        count += countAllComments(comment.replies); // Recursively count replies
+      }
+    });
+    return count;
+  };
+  
 
   useEffect(() => {
     reloadComments();
@@ -39,10 +54,10 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
 
   const handleEdit = async (commentId: string, newContent: string) => {
     try {
-      const comment = comments.find(c => c.id === commentId);
-      if (!comment || !currentUserUid) return;
+      if (!currentUserUid) return;
       await updateComment(commentId, newContent, currentUserUid);
-      setComments(comments => comments.map(c => c.id === commentId ? { ...c, content: newContent } : c));
+      // Reload comments to get updated structure after edit
+      reloadComments();
     } catch {
       setError('Failed to update comment.');
     }
@@ -50,12 +65,10 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
 
   const handleDelete = async (commentId: string) => {
     try {
-      const comment = comments.find(c => c.id === commentId);
-      if (!comment || !currentUserUid) return;
+      if (!currentUserUid) return;
       await deleteComment(commentId, thoughtId, currentUserUid);
-      const newComments = comments.filter(c => c.id !== commentId);
-      setComments(newComments);
-      onCommentCountChange?.(newComments.length);
+      // Reload comments to get updated structure after deletion
+      reloadComments();
     } catch {
       setError('Failed to delete comment.');
     }
@@ -80,7 +93,7 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
             Comments
           </h3>
           <span className="inline-flex items-center justify-center w-6 h-6 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-full text-xs font-medium">
-            {comments.length}
+            {countAllComments(comments)}
           </span>
         </div>
         
@@ -132,6 +145,7 @@ export default function CommentSection({ thoughtId, onBack, showBackButton = fal
                 currentUserUid={currentUserUid}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onReplyCreated={reloadComments}
               />
             ))}
           </div>

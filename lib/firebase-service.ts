@@ -89,7 +89,7 @@ export async function getThoughts(limitCount: number = 50): Promise<Thought[]> {
   return thoughts;
 }
 
-export async function createComment(data: CommentFormData): Promise<string> {
+export async function createComment(data: CommentFormData & { parentId?: string }): Promise<string> {
   const sanitizedContent = sanitizeInput(data.content);
   
   if (!sanitizedContent) {
@@ -109,6 +109,7 @@ export async function createComment(data: CommentFormData): Promise<string> {
     timestamp: serverTimestamp(),
     thoughtId: data.thoughtId,
     uid: currentUser.uid,
+    parentId: data.parentId || null, // Add parentId for replies
   };
 
   const docRef = await addDoc(collection(db, COMMENTS_COLLECTION), commentData);
@@ -119,26 +120,52 @@ export async function createComment(data: CommentFormData): Promise<string> {
 export async function getComments(thoughtId: string): Promise<Comment[]> {
   const q = query(
     collection(db, COMMENTS_COLLECTION),
+    where('thoughtId', '==', thoughtId),
     orderBy('timestamp', 'asc')
   );
 
   const querySnapshot = await getDocs(q);
-  const comments: Comment[] = [];
+  const allComments: Comment[] = [];
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
-    if (data.thoughtId === thoughtId) {
-      comments.push({
-        id: doc.id,
-        content: data.content,
-        pseudonym: data.pseudonym,
-        timestamp: data.timestamp?.toDate() || new Date(),
-        thoughtId: data.thoughtId
-      });
+    allComments.push({
+      id: doc.id,
+      content: data.content,
+      pseudonym: data.pseudonym,
+      timestamp: data.timestamp?.toDate() || new Date(),
+      thoughtId: data.thoughtId,
+      uid: data.uid,
+      parentId: data.parentId || undefined,
+      replies: [],
+    });
+  });
+
+  // Build nested structure
+  const commentMap = new Map<string, Comment>();
+  const topLevelComments: Comment[] = [];
+
+  // First pass: create map of all comments
+  allComments.forEach(comment => {
+    commentMap.set(comment.id, comment);
+  });
+
+  // Second pass: build nested structure
+  allComments.forEach(comment => {
+    if (comment.parentId) {
+      // This is a reply
+      const parent = commentMap.get(comment.parentId);
+      if (parent) {
+        if (!parent.replies) parent.replies = [];
+        parent.replies.push(comment);
+      }
+    } else {
+      // This is a top-level comment
+      topLevelComments.push(comment);
     }
   });
 
-  return comments;
+  return topLevelComments;
 } 
 
 export async function updateComment(commentId: string, newContent: string, uid: string): Promise<void> {

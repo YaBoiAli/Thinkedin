@@ -21,6 +21,8 @@ export interface Comment {
   timestamp: Date;
   thoughtId: string;
   uid?: string; // Add uid for permission checks
+  parentId?: string; // For nested comments/replies
+  replies?: Comment[]; // Child comments
 }
 
 export interface ThoughtFormData {
